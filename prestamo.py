@@ -1,10 +1,13 @@
-from libro import Libro
+
 
 
 class Prestamo:
-    def __init__(self, id_libro, id_user):
+    def __init__(self, id_libro, id_user, fechaini, fechasal, id):
         self.id_libro = id_libro
         self.id_user = id_user
+        self.fechaini = fechaini
+        self.fechasal = fechasal
+        self.id = id
 
     def getId_libro(self):
         return self.id_libro
@@ -17,3 +20,21 @@ class Prestamo:
 
     def setId_user(self, id_user):
         self.id_user = id_user
+    
+    def getFechaini(self):
+        return self.fechaini
+
+    def setFechaini(self, fechaini):
+        self.fechaini = fechaini
+
+    def getFechasal(self):
+        return self.fechasal
+
+    def setFechasal(self, fechasal):
+        self.fechasal = fechasal
+
+    def getId(self):
+        return self.id
+
+    def setId(self, id):
+        self.id = id

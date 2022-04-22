@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import json
+from datetime import datetime
+import datetime
 from libro import Libro
 from prestamo import Prestamo
 from usuario import Usuario
@@ -8,6 +10,7 @@ app = Flask(__name__)
 CORS(app)
 libros = []
 usuarios = []
+prestamos = []
 
 @app.route("/", methods=["GET"])
 def inicio():
@@ -262,5 +265,70 @@ def login():
             "status":500,
             "msg": "Formato de petición inválido"
         }),500
+
+@app.route("/prestamo",methods=["POST"])
+def registrar_prestamo():
+    try:
+        idlibro = request.json["id_book"]
+        idusuario = request.json["id_user"]
+        fechai = datetime.datetime.utcnow().strftime('%d/%m/%Y')
+        ahora = datetime.datetime.utcnow()
+        fechaf = ahora + datetime.timedelta(days=7)
+        fechaf = fechaf.strftime('%d/%m/%Y')
+        if verificar_usuario(idusuario)==True and verificar_libro(idlibro)==True:
+            if len(prestamos)==0:
+                prestamos.append(Prestamo(idlibro, idusuario, fechai, fechaf, 1))
+                return jsonify({
+                    "id_loan": 1,
+                    "id_book": retornar_libro(idlibro).getId(),
+                    "book_title": retornar_libro(idlibro).getTitulo(),
+                    "book_type": retornar_libro(idlibro).getTipo(),
+                    "author": retornar_libro(idlibro).getAutor(),
+                    "book_year": retornar_libro(idlibro).getAnio(),
+                    "book_editorial": retornar_libro(idlibro).getEditorial(),
+                    "loan_date": fechai,
+                    "return_date": fechaf,
+                    "id_user": retornar_usuario(idusuario).getId(),
+                    "user_display_name": retornar_usuario(idusuario).getNombre(),
+                    "user_career": retornar_usuario(idusuario).getCarrera(),
+                    "user_carnet": retornar_usuario(idusuario).getCarnet()
+                }),200
+            else:
+                prestamos.append(Prestamo(idlibro, idusuario, fechai, fechaf, prestamos[len(prestamos)-1].getId()+1))
+                return jsonify({
+                    "id_loan": prestamos[len(prestamos)-1].getId()+1,
+                    "id_book": retornar_libro(idlibro).getId(),
+                    "book_title": retornar_libro(idlibro).getTitulo(),
+                    "book_type": retornar_libro(idlibro).getTipo(),
+                    "author": retornar_libro(idlibro).getAutor(),
+                    "book_year": retornar_libro(idlibro).getAnio(),
+                    "book_editorial": retornar_libro(idlibro).getEditorial(),
+                    "loan_date": fechai,
+                    "return_date": fechaf,
+                    "id_user": retornar_usuario(idusuario).getId(),
+                    "user_display_name": retornar_usuario(idusuario).getNombre(),
+                    "user_career": retornar_usuario(idusuario).getCarrera(),
+                    "user_carnet": retornar_usuario(idusuario).getCarnet()
+                }),200
+        else:
+            return jsonify({
+            "status":400,
+            "msg": "Datos no encontrados en el sistema"
+        }),400
+    except:
+        return jsonify({
+            "status":500,
+            "msg": "Formato de petición inválido"
+        }),500
+
+def retornar_usuario(id):
+    for i in range(len(usuarios)):
+        if usuarios[i].getId()==id:
+            return usuarios[i]
+
+def retornar_libro(id):
+    for i in range(len(libros)):
+        if libros[i].getId()==id:
+            return libros[i]
 if __name__ == "__main__":
     app.run(host="localhost", port=3000, debug=True)
