@@ -193,5 +193,74 @@ def buscar_libro():
                     "status": 422,
                     "msg": "Error, no se pudo procesar la petición"
                     }), 422
+
+@app.route("/user", methods=["POST"])
+def agregar_usuario():
+    try:
+        id=request.json["id_user"]
+        nombre=request.json["user_display_name"]
+        nickname=request.json["user_nickname"]
+        password=request.json["user_password"]
+        anio=int(request.json["user_age"])
+        carrera=request.json["user_career"]
+        carnet=int(request.json["user_carnet"])
+        if verificar_usuario(id)==False:
+            usuarios.append(Usuario(id, nombre, nickname, password, anio, carrera, carnet))
+            return jsonify({
+                "status": 200,
+                "message": "Usuario creado con éxito"
+            }),200
+        else:
+            return jsonify({
+                "status": 400,
+                "message": "ID ya existente en el sistema"
+            }),400
+    except:
+        return jsonify({
+                "status": 500,
+                "message": "Formato de petición invalido"
+            }),500
+
+def verificar_usuario(id):
+    global usuarios
+    if len(usuarios)==0:
+        return False
+    else:
+        for i in range(len(usuarios)):
+            if usuarios[i].id==id:
+                return True
+        return False
+
+@app.route("/login", methods=["POST"])
+def login():
+    try:
+        nickname=request.json["user_nickname"]
+        password=request.json["user_password"]
+        for i in range(len(usuarios)):
+            if nickname==usuarios[i].getNickname():
+                if password==usuarios[i].getPassword():
+                    return jsonify({
+                        "id_user":usuarios[i].getId(),
+                        "user_display_name":usuarios[i].getNombre(),
+                        "user_nickname":usuarios[i].getNickname(),
+                        "user_password":usuarios[i].getPassword(),
+                        "user_age":usuarios[i].getAnio(),
+                        "user_career":usuarios[i].getCarrera(),
+                        "user_carnet":usuarios[i].getCarnet()
+                        }),200
+                else:
+                    return jsonify({
+                        "status":400,
+                        "msg": "Contraseña incorrecta"
+                    }),400
+        return jsonify({
+            "status":400,
+            "msg": "Usuario no encontrado"
+        }),400
+    except:
+        return jsonify({
+            "status":500,
+            "msg": "Formato de petición inválido"
+        }),500
 if __name__ == "__main__":
     app.run(host="localhost", port=3000, debug=True)
