@@ -8,6 +8,7 @@ class Prestamo:
         self.fechaini = fechaini
         self.fechasal = fechasal
         self.id = id
+        self.multa= 0
 
     def getId_libro(self):
         return self.id_libro
@@ -38,3 +39,9 @@ class Prestamo:
 
     def setId(self, id):
         self.id = id
+
+    def getMulta(self):
+        return self.multa
+
+    def setMulta(self, multa):
+        self.multa = multa

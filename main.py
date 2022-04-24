@@ -11,6 +11,10 @@ CORS(app)
 libros = []
 usuarios = []
 prestamos = []
+libros.append(Libro("1","fdsf","dfsd","dfsdg",3,2,1,2001,"dfs"))
+usuarios.append(Usuario("1","jflll","nikl","jiji",2003,"Sistemas",201902259))
+prestamos.append(Prestamo("1","1","01/04/2022","08/04/2022",1))
+
 
 @app.route("/", methods=["GET"])
 def inicio():
@@ -330,5 +334,69 @@ def retornar_libro(id):
     for i in range(len(libros)):
         if libros[i].getId()==id:
             return libros[i]
+
+@app.route("/prestamo",methods=["PUT"])
+def calcular_multa():
+    try:
+        idprestamo=request.json["id_loan"]
+        for i in range(len(prestamos)):
+            if idprestamo==prestamos[i].getId():
+                fechasal = prestamos[i].getFechasal()
+                ahora = datetime.datetime.utcnow()
+                print(ahora)
+                fechas=datetime.datetime.strptime(str(fechasal), '%d/%m/%Y')
+                print(fechas)
+                dias= ahora-fechas
+                cdias=dias.total_seconds()/(3600*24)
+                print(str(int(cdias)))
+                prestamos[i].setMulta(cdias)
+                for libro in libros:
+                    for usuario in usuarios:
+                        if libro.getId()==prestamos[i].getId_libro() and usuario.getId()==prestamos[i].getId_user():
+                            return jsonify({
+                                "id_loan":prestamos[i].getId(),
+                                "book_title": libro.getTitulo(),
+                                "loan_date": prestamos[i].getFechaini(),
+                                "return_date": prestamos[i].getFechasal(),
+                                "user_display_name": usuario.getNombre(),
+                                "penalty_fee": int(cdias)
+                            }),200            
+        return jsonify({
+        "status":400,
+        "msg": "Datos no encontrados en el sistema"
+    }),400
+    except:
+        return jsonify({
+            "status":500,
+            "msg": "Formato de petición inválido"
+        }),500
+
+@app.route("/prestamo",methods=["GET"])
+def obtener_prestamo():
+    try:
+        idprestamo=request.json["id_loan"]
+        for i in range(len(prestamos)):
+            if idprestamo==prestamos[i].getId():
+                for libro in libros:
+                    for usuario in usuarios:
+                        if libro.getId()==prestamos[i].getId_libro() and usuario.getId()==prestamos[i].getId_user():
+                            return jsonify({
+                                "id_loan":prestamos[i].getId(),
+                                "id_book": libro.getId(),
+                                "loan_date": prestamos[i].getFechaini(),
+                                "return_date": prestamos[i].getFechasal(),
+                                "id_user": usuario.getId()
+                            }),200            
+        return jsonify({
+        "status":400,
+        "msg": "Datos no encontrados en el sistema"
+    }),400
+    except:
+        return jsonify({
+            "status":500,
+            "msg": "Formato de petición inválido"
+        }),500
+
+
 if __name__ == "__main__":
     app.run(host="localhost", port=3000, debug=True)
