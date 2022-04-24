@@ -349,7 +349,8 @@ def calcular_multa():
                 dias= ahora-fechas
                 cdias=dias.total_seconds()/(3600*24)
                 print(str(int(cdias)))
-                prestamos[i].setMulta(cdias)
+                if cdias>0:
+                    prestamos[i].setMulta(int(cdias))
                 for libro in libros:
                     for usuario in usuarios:
                         if libro.getId()==prestamos[i].getId_libro() and usuario.getId()==prestamos[i].getId_user():
@@ -359,7 +360,7 @@ def calcular_multa():
                                 "loan_date": prestamos[i].getFechaini(),
                                 "return_date": prestamos[i].getFechasal(),
                                 "user_display_name": usuario.getNombre(),
-                                "penalty_fee": int(cdias)
+                                "penalty_fee": prestamos[i].getMulta()
                             }),200            
         return jsonify({
         "status":400,
@@ -396,6 +397,46 @@ def obtener_prestamo():
             "status":500,
             "msg": "Formato de petición inválido"
         }),500
+
+@app.route("/usuarios/prestamos",methods=["GET"])
+def obtenerusruariosyprestamos():
+    global usuarios
+    global prestamos
+    try:
+        us=[]
+        for usuario in usuarios:
+            p=[]
+            for prestamo in prestamos:
+                if usuario.getId()==prestamo.getId_user():
+                    if prestamo.getMulta==0:
+                        prest={
+                            "id_loan":prestamo.getId(),
+                            "loan_date": prestamo.getFechaini(),
+                            "return_date": prestamo.getFechasal()
+                        }
+                        p.append(prest)
+                    else:
+                        prest={
+                            "id_loan":prestamo.getId(),
+                            "loan_date": prestamo.getFechaini(),
+                            "return_date": prestamo.getFechasal(),
+                            "penalty_fee": prestamo.getMulta()
+                        }
+                        p.append(prest)
+            user={
+                "id_user":usuario.getId(),
+                "user_display_name": usuario.getNombre(),
+                "user_nickname": usuario.getNickname(),
+                "loans": p
+            }
+            us.append(user)
+        return jsonify(us)
+    except:
+        return jsonify({
+            "status":500,
+            "msg": "Error en la petición"
+        }),500
+
 
 
 if __name__ == "__main__":
