@@ -7,3 +7,8 @@
   * Introducción a la Programación y Computación 1
 * Sección
   * D
+
+* Documentación:
+  * https://documenter.getpostman.com/view/20559502/Uyr7Gddh
+* Heroku:
+  * https://ipc1-proyecto2-201902259.herokuapp.com/
